@@ -93,10 +93,19 @@ as HTML and a bare newline would collapse to a space.
 
 ### What goes in each cell
 
-- **`IPA` — pick a transcription, never write one.** Run `lookup.py lookup <word>` and copy
-  `pronunciations[].text` **verbatim**. Prefer the entry tagged `variety: "us"`; that tag comes
-  from the audio filename and is trustworthy. If the word has no transcription, leave the cell
-  empty — an invented IPA is worse than a missing one.
+- **`IPA` — write it when you know it, look it up when you don't.** `lookup.py lookup <word>`
+  is the fallback, not a step to run every time: calling it for a word you can already
+  transcribe is a round-trip that buys nothing.
+  **What counts as knowing it**: the whole transcription, stress mark included, in General
+  American — not a rough shape of the word. Doubt about which syllable carries the stress, an
+  unstressed vowel that could be `/ə/` or `/ɪ/`, or a word whose US and UK forms diverge is
+  not knowing it; that is the case the fallback exists for, and it is exactly the case a B2+
+  word tends to be.
+  From `lookup.py`, copy `pronunciations[].text` **verbatim** and prefer the entry tagged
+  `variety: "us"` — that tag comes from the audio filename and is trustworthy. If it returns
+  no transcription either, leave the cell empty. An invented IPA is worse than a missing one:
+  a missing one teaches nothing, a wrong one teaches a wrong pronunciation and gets rehearsed
+  until it sticks.
 - **`POS` + `Meaning` — pick the sense that matches the context.** `lookup.py` returns senses
   unfiltered and the first is often the wrong one (`bloat` starts at the veterinary sense).
   Read them all, choose the one actually met, and copy that `definition` verbatim. If no

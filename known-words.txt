@@ -23,5 +23,3 @@
 #
 # Lines starting with # are ignored, so notes like this one are free.
 
-approve
-reject

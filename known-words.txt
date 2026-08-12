@@ -1,5 +1,10 @@
 # Words Tân already knows — one per line, and no card is ever made for them.
 #
+# This list is for the exceptions only. The answer format already refuses anything below
+# B2, so every easy word is out before this file is consulted: what belongs here is the
+# harder word he happens to know anyway. If the list starts filling up with words that
+# were never worth a card, the floor is being ignored — fix that, not this file.
+#
 # The list is read twice. A SessionStart hook prints it into the session, so the answer
 # skips these words instead of spending one of its three word-list slots on them; and
 # `vocab-capture.py` checks it again before queueing, which is the half that cannot be

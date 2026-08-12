@@ -1,0 +1,22 @@
+# Words Tân already knows — one per line, and no card is ever made for them.
+#
+# The list is read twice. A SessionStart hook prints it into the session, so the answer
+# skips these words instead of spending one of its three word-list slots on them; and
+# `vocab-capture.py` checks it again before queueing, which is the half that cannot be
+# forgotten. Anything here therefore never reaches the sheet, however the answer was
+# written.
+#
+# Matching is the whole line, lower-cased: `reject` covers the noun and the verb both,
+# because knowing a word is not knowing one part of speech of it. A phrasal verb is
+# written out in full — `drift apart`, not `drift`. No stemming: `vanish` does not
+# silence `vanished`, since guessing at word forms would silence words by accident.
+#
+# Adding a word here does not remove the row it already has. The sheet is rebuilt from
+# `history.jsonl`, which is the record of what was taught, and a card already in Anki
+# carries review history worth more than the tidiness of deleting it. Suspend it in Anki
+# if it is in the way.
+#
+# Lines starting with # are ignored, so notes like this one are free.
+
+approve
+reject

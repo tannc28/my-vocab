@@ -72,6 +72,14 @@ worth seeing again, and reading today's rows is how that gets noticed; leaving i
 under the day it was first met hides it, and stacking sentences onto it makes the row
 harder to read every time.
 
+**A word in `known-words.txt` never becomes a row at all.** That file is Tân's own list of
+words he already knows, one per line, matched on the whole line lower-cased. It is read
+twice: a SessionStart hook shows it to the answer so the word is not written, and
+`vocab-capture.py` checks it again before queueing, which is the half that holds when the
+first is forgotten. Adding a word there does not delete the row it already has — the sheet
+is rebuilt from `history.jsonl`, and a card already in Anki carries review history worth
+more than the tidiness of removing it.
+
 Never edit an `ID` afterwards: it is how Anki matches a note back to its row, and changing
 it strands the review history.
 

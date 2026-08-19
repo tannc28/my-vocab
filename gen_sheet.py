@@ -36,12 +36,12 @@ HEADERS = [
 # Row 2. Each cell is "key=value; key=value" for that column; an empty cell means defaults.
 CONFIG_ROW = {
     "ID": "#config align=center",
-    "Word": "side=front; size=40; bold; tts=en_US",
+    "Word": "side=front; size=40; bold; tts=en_US; voices=Apple_Ava",
     "IPA": "side=front; size=18; color=muted",
     "POS": "side=front; size=14; color=accent; italic",
     "Meaning": "size=22",
     "Collocation": "label=Collocations; size=17; color=accent",
-    "Example": "label=Examples; size=17; italic; tts=en_US",
+    "Example": "label=Examples; size=17; italic; tts=en_US; voices=Apple_Ava",
 }
 
 SAMPLE = [

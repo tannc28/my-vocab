@@ -184,3 +184,18 @@ can read the same URL from the browser; that page runs the add-on's own code, so
 mapping and warnings are the real ones.
 
 Re-importing updates notes instead of duplicating them, because identity comes from `ID`.
+
+## 6. Trang web xem sổ từ
+
+`index.html` ở gốc repo là một cách render thứ hai của cùng `history.jsonl`: nó fetch file đó
+trong trình duyệt, dedupe đúng luật của `flush_queue.py` (`<word>-<pos dài>`, lần gặp sau thay
+lần trước) rồi vẽ ra tổng quan, danh sách và thẻ chi tiết. Không có bước build và không có bản
+sao dữ liệu nào — sheet, deck và trang web đều là view của một file.
+
+- Tổng quan: số từ, số ngày, biểu đồ từ mới theo ngày, phân bố loại từ, từ gặp lại nhiều lần.
+- Bấm vào một từ: mở thẻ (IPA, nghĩa, collocations, ví dụ, Deep dive) kèm tra tại chỗ qua
+  `api.dictionaryapi.dev` — đúng API `lookup.py` dùng — và link Cambridge / Oxford / YouGlish.
+- `#w=<id>` mở thẳng một từ, nên một từ là một URL chia sẻ được.
+
+Publish cũng là `git push`, y như sheet: GitHub Pages phục vụ nhánh `main`, thư mục gốc
+(`.nojekyll` để Pages đưa file nguyên trạng, không chạy Jekyll).

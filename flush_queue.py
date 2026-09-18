@@ -64,6 +64,19 @@ def strip_md(text):
     return re.sub(r"\*{1,2}([^*]+)\*{1,2}", r"\1", text)
 
 
+def deep_dive(item):
+    """The Deep dive cell: one line of free prose, captured whole.
+
+    Rows written before the field existed carry nothing and land empty, and a handful
+    written while it was being settled stored a list; both are accepted so history never
+    has to be rewritten to change the shape of a column.
+    """
+    value = item.get("deep") or item.get("hint") or ""
+    if isinstance(value, list):
+        value = " ".join(str(v) for v in value)
+    return html(strip_md(value))
+
+
 def vocab_row(item):
     # One row per word, forever: meeting the word again refreshes the card he already
     # has rather than opening a second one.
@@ -78,6 +91,8 @@ def vocab_row(item):
         "Meaning": clean(item.get("meaning", "")),
         "Collocation": clean(item.get("collocation", "")),
         "Example": html(item.get("example", "")),
+        # Free prose, captured verbatim: nothing to normalise, only tabs to strip.
+        "Deep dive": deep_dive(item),
     }
 
 
@@ -92,6 +107,7 @@ def grammar_row(item):
         "Corrected": html(item["corrected"]),
         "Fixes": "<br>".join(
             html(strip_md(f"[{f['tag']}] {f['body']}")) for f in fixes),
+        "Deep dive": deep_dive(item),
     }
 
 

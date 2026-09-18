@@ -31,6 +31,7 @@ HEADERS = [
     "Meaning",
     "Collocation",
     "Example",
+    "Deep dive",    # the free-prose explanation; the only bilingual column
 ]
 
 # Row 2. Each cell is "key=value; key=value" for that column; an empty cell means defaults.
@@ -42,6 +43,9 @@ CONFIG_ROW = {
     "Meaning": "size=22",
     "Collocation": "label=Collocations; size=17; color=accent",
     "Example": "label=Examples; size=17; italic; tts=en_US; voices=Apple_Ava_(Premium)",
+    # Last on the back and visually quieter: it is read after the English has already
+    # done its work, so it deepens the card instead of short-circuiting it.
+    "Deep dive": "label=Deep dive; size=16; color=muted",
 }
 
 SAMPLE = [
@@ -56,11 +60,14 @@ SAMPLE = [
         "Collocation": "postpone a release · postpone the golive · postpone indefinitely",
         "Example": "We had to postpone the golive until the pipeline went green.<br>"
                    "They postponed the review because the spec was still changing.",
+        "Deep dive": "postpone = dời một việc sang lúc khác, việc vẫn sẽ diễn ra. Gần "
+                     "nghĩa có put off và cancel, nhưng put off là cách nói miệng của "
+                     "cùng ý đó, còn cancel là huỷ hẳn, không diễn ra nữa.",
     },
 ]
 
 COLUMN_WIDTHS = {"A": 22, "B": 7, "C": 13, "D": 16, "E": 16, "F": 8,
-                 "G": 44, "H": 44, "I": 52}
+                 "G": 44, "H": 44, "I": 52, "J": 78}
 
 # ---------------------------------------------------------------- grammar tab
 
@@ -73,6 +80,7 @@ G_HEADERS = [
     "Original",     # first content column -> front
     "Corrected",
     "Fixes",        # the tagged bullets, joined by <br>
+    "Deep dive",    # why the mistake happened at all — free prose, bilingual
 ]
 
 G_CONFIG_ROW = {
@@ -80,6 +88,7 @@ G_CONFIG_ROW = {
     "Original": "side=front; size=26; italic; color=muted",
     "Corrected": "size=26; bold; tts=en_US",
     "Fixes": "label=Fixes; size=16; color=accent",
+    "Deep dive": "label=Deep dive; size=16; color=muted",
 }
 
 G_SAMPLE = [
@@ -92,10 +101,14 @@ G_SAMPLE = [
         "Fixes": "[Spelling] &quot;dose&quot; → &quot;does&quot;<br>"
                  "[Grammar] &quot;for practice&quot; → &quot;for practicing&quot; — "
                  "after &quot;for&quot;, use the -ing form",
+        "Deep dive": "Sau giới từ (for, by, before, without) động từ phải mang dạng "
+                     "-ing, vì lúc đó nó đóng vai một danh từ. Tiếng Việt không chia "
+                     "động từ nên &quot;for practice&quot; nghe thuận tai người Việt. "
+                     "Cùng luật: &quot;thanks for helping&quot;, &quot;before deploying&quot;.",
     },
 ]
 
-G_COLUMN_WIDTHS = {"A": 22, "B": 7, "C": 13, "D": 58, "E": 58, "F": 70}
+G_COLUMN_WIDTHS = {"A": 22, "B": 7, "C": 13, "D": 58, "E": 58, "F": 70, "G": 78}
 
 
 def fill(ws, headers, config_row, widths, sample):

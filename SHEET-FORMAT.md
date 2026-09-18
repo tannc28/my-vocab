@@ -41,6 +41,7 @@ but **must not contain a tab**.
 | G | `Meaning` | back — English-to-English |
 | H | `Collocation` | back |
 | I | `Example` | back |
+| J | `Deep dive` | back, last — free prose, the only bilingual column |
 
 Config row (row 2) — do not rewrite it when adding words:
 
@@ -52,12 +53,18 @@ POS          side=front; size=14; color=accent; italic
 Meaning      size=22
 Collocation  label=Collocations; size=17; color=accent
 Example      label=Examples; size=17; italic; tts=en_US
+Deep dive    label=Deep dive; size=16; color=muted
 ```
 
 Which produces one card:
 
 - **Front** — the word at 40 px, read aloud by the system voice, then IPA and part of speech.
-- **Back** — meaning, collocations, then all examples, also read aloud.
+- **Back** — meaning, collocations, then all examples, also read aloud, and last the
+  Deep dive: one line of free prose, in Vietnamese, opening with the word itself and going
+  on to the near-synonyms and how their use differs. It is last and visually quiet on
+  purpose — it is read after the English has already done its work, so it deepens the card
+  instead of short-circuiting it. The grammar tab has the same column, holding why the
+  mistake happened rather than what was changed.
 
 ## 3. Rules for writing a row
 

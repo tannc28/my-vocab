@@ -84,12 +84,10 @@ each line starting with `· `, exactly as the chat shows them. Older captures st
 comparisons folded into the prose after ` So sánh: `; `flush_queue.deep_parts()` splits
 those back into lines, so history is never rewritten.
 
-**A word met again does not make a second row — it moves to the day it was met again.**
-The later capture replaces the row wholesale, `Example` included, and the row leaves its
-old day for today's, at the top of the sheet. A word that keeps coming back is the one
-worth seeing again, and reading today's rows is how that gets noticed; leaving it parked
-under the day it was first met hides it, and stacking sentences onto it makes the row
-harder to read every time.
+**A word already on the sheet counts as learned, and meeting it again changes nothing.**
+`vocab-capture.py` drops the new capture before it is queued (`capture.log`: "already in
+the deck, not queued"), so the row keeps its day, its example and its picture, and no
+model is paid to draw it twice.
 
 **A word in `known-words.txt` never becomes a row at all.** That file is Tân's own list of
 words he already knows, one per line, matched on the whole line lower-cased. It is read

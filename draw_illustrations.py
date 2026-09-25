@@ -71,6 +71,11 @@ MAX_BYTES = 10240       # a chosen ceiling, not a measurement: one panel came ou
 MAX_TEXT_WORDS = 36     # node letters (A, B, C) do not count as words
 PANELS = ("meaning", "example", "deep")
 
+# Measured on the same 6 words, pictures compared side by side: Sonnet passed the
+# validator as often as Opus, drew them as clearly, and cost $0.038 a word against Opus's
+# $0.062. `--model opus` is still there for a word Sonnet draws badly.
+DEFAULT_MODEL = "sonnet"
+
 SYSTEM = ("You draw small flashcard illustrations as a single inline SVG. "
           "Reply with the SVG markup only: no prose, no code fence.")
 
@@ -231,18 +236,23 @@ def ask(prompt, model=None):
     no MCP, run from an empty directory so no project instructions are found either."""
     cmd = ["claude", "-p", "--setting-sources", "", "--tools", "", "--strict-mcp-config",
            "--output-format", "json", "--system-prompt", SYSTEM]
-    if model:
-        cmd += ["--model", model]
+    cmd += ["--model", model or DEFAULT_MODEL]
     with tempfile.TemporaryDirectory() as empty:
         proc = subprocess.run(cmd + [prompt], cwd=empty, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr.strip() or proc.stdout.strip() or f"exit {proc.returncode}")
     data = json.loads(proc.stdout)
-    models = list((data.get("modelUsage") or {}).keys())
+    usage = data.get("modelUsage") or {}
+    model, u = next(iter(usage.items()), (None, {}))
     return data.get("result", ""), {
         "cost_usd": data.get("total_cost_usd"),
         "duration_ms": data.get("duration_ms"),
-        "model": models[0] if models else None,
+        "model": model,
+        # Cached input is still input: the three counts together are what was read.
+        "input_tokens": sum(u.get(k, 0) for k in
+                            ("inputTokens", "cacheCreationInputTokens", "cacheReadInputTokens")),
+        "output_tokens": u.get("outputTokens"),
+        "thinking_tokens": u.get("thinkingTokens"),
     }
 
 
@@ -312,7 +322,7 @@ def main():
     ap.add_argument("--ids", help="comma-separated word ids; default: every word with a spec")
     ap.add_argument("--redo", action="store_true", help="redraw even if a file exists (never a data-hand one)")
     ap.add_argument("--jobs", type=int, default=4)
-    ap.add_argument("--model", help="passed to claude --model; default: the CLI's default")
+    ap.add_argument("--model", help=f"passed to claude --model; default: {DEFAULT_MODEL}")
     ap.add_argument("--dry", action="store_true", help="list what would be drawn")
     ap.add_argument("--new", action="store_true",
                     help="only words captured by the current hook (what the hook runs); "

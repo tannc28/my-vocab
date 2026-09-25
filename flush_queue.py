@@ -67,17 +67,35 @@ def strip_md(text):
     return re.sub(r"\*{1,2}([^*]+)\*{1,2}", r"\1", text)
 
 
-def deep_dive(item):
-    """The Deep dive cell: one line of free prose, captured whole.
+# Captures from before `contrasts` existed have the comparison lines folded into the prose
+# as `… So sánh: a — "…" (…) · b — "…" (…)`. A new item starts after a closing ")" where
+# the next one opens with a quote, or with a short word and " — ".
+_LEGACY_FOLD = " So sánh: "
+_LEGACY_SPLIT = re.compile(r'(?<=\))\s·\s(?=(?:[^"·]{1,60}?\s—\s)?")')
 
-    Rows written before the field existed carry nothing and land empty, and a handful
-    written while it was being settled stored a list; both are accepted so history never
+
+def deep_parts(item):
+    """(prose, [comparison lines]) for an item, whichever shape history stored it in.
+
+    Rows written while the field was being settled stored a list, and older ones carry
+    the comparisons folded into the prose; all are read as they are, so history never
     has to be rewritten to change the shape of a column.
     """
     value = item.get("deep") or item.get("hint") or ""
     if isinstance(value, list):
         value = " ".join(str(v) for v in value)
-    return html(strip_md(value))
+    contrasts = list(item.get("contrasts") or [])
+    if not contrasts and _LEGACY_FOLD in value:
+        value, tail = value.split(_LEGACY_FOLD, 1)
+        contrasts = [c.strip() for c in _LEGACY_SPLIT.split(tail) if c.strip()]
+    return value.strip(), contrasts
+
+
+def deep_dive(item):
+    """The Deep dive cell: the prose, then each comparison on its own line, as in the chat."""
+    prose, contrasts = deep_parts(item)
+    lines = [html(strip_md(prose))] + [f"· {html(strip_md(c))}" for c in contrasts]
+    return "<br>".join(line for line in lines if line)
 
 
 def illustration(word_id):
@@ -143,6 +161,12 @@ def build_rows(items):
         index = {}
         for item in items:
             if item.get("kind", "vocab") != tab:
+                continue
+            if tab == "vocab" and not deep_parts(item)[0]:
+                # The deck is the words that were taught, not only named: a capture with
+                # no Deep dive is left in history but never becomes a card, and it cannot
+                # replace a capture of the same word that did carry one.
+                skipped += 1
                 continue
             try:
                 row = builder(item)

@@ -83,6 +83,8 @@ select.chip{padding:4px 8px}
 .colls{display:flex;gap:6px;flex-wrap:wrap}
 .coll{background:var(--accent-bg);color:var(--accent);border-radius:6px;padding:2px 9px;font-size:13px}
 .ex{border-left:2px solid var(--line);padding:1px 0 1px 12px;margin:0 0 6px;font-style:italic;font-family:var(--serif);font-size:15.5px}
+.pic{margin:10px 0 4px;color:var(--ink)}
+.pic svg{display:block;margin:0 auto}
 .deep{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--ink2);font-size:13.5px}
 .links{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .links a{border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:12.5px;text-decoration:none;color:var(--ink2)}
@@ -438,6 +440,7 @@ function paintCard(r){
   h.push('<div class="meta">' + esc(r.pos || "—") + " · gom ngày " + esc(r.date) +
     (r.times > 1 ? " · gặp lại " + r.times + " lần" : "") + " · id " + esc(r.id) + "</div>");
   if(r.meaning) h.push('<div class="lbl">Nghĩa</div><div class="meaning">' + esc(r.meaning) + "</div>");
+  h.push('<div class="pic" id="pic"></div>');
   if(r.collocation) h.push('<div class="lbl">Collocations</div><div class="colls">' +
     r.collocation.split("·").map(function(c){ return '<span class="coll">' + esc(c.trim()) + "</span>"; }).join("") + "</div>");
   if(r.example) h.push('<div class="lbl">Ví dụ đã gặp</div>' +
@@ -446,6 +449,20 @@ function paintCard(r){
   h.push(linksFor(r.word));
   h.push('<div class="dict" id="dict"></div>');
   detailEl.innerHTML = h.join("");
+  paintPic(r.id);
+}
+/* The card's illustration, drawn by draw_illustrations.py into illustrations/<id>.svg.
+   Inlined rather than put in an <img>, so its currentColor ink follows this page's
+   light/dark theme the way it follows Anki's night mode. Every file passed the
+   drawer's validator (no script, no style, no links) before it was written. */
+function paintPic(id){
+  fetch("illustrations/" + encodeURIComponent(id) + ".svg", {cache: "no-cache"})
+    .then(function(res){ return res.ok ? res.text() : ""; })
+    .then(function(svg){
+      var box = document.getElementById("pic");
+      if(box && S.current === id && svg.trim().indexOf("<svg") === 0) box.innerHTML = svg;
+    })
+    .catch(function(){});
 }
 function openBare(word){
   S.current = null;

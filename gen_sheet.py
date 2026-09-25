@@ -29,6 +29,7 @@ HEADERS = [
     "IPA",
     "POS",
     "Meaning",
+    "Illustration", # one-line SVG drawn from the answer's pic: line; empty until drawn
     "Collocation",
     "Example",
     "Deep dive",    # the free-prose explanation; the only bilingual column
@@ -67,7 +68,7 @@ SAMPLE = [
 ]
 
 COLUMN_WIDTHS = {"A": 22, "B": 7, "C": 13, "D": 16, "E": 16, "F": 8,
-                 "G": 44, "H": 44, "I": 52, "J": 78}
+                 "G": 44, "H": 24, "I": 44, "J": 52, "K": 78}
 
 # ---------------------------------------------------------------- grammar tab
 

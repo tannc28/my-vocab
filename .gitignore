@@ -221,3 +221,7 @@ __marimo__/
 # The queue the Stop hook writes; flush_queue.py drains and deletes it.
 # history.jsonl is the record, so this file is never worth a commit.
 queue.jsonl
+
+# drawer and flush locks
+.flush.lock
+illustrations/.draw.lock

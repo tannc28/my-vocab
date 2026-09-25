@@ -25,6 +25,7 @@ Every cell comes straight from what the answer printed, so rows arrive finished 
 model is involved anywhere in the path.
 """
 import argparse
+import fcntl
 import hashlib
 import json
 import os
@@ -38,6 +39,8 @@ VOCAB_DIR = os.path.dirname(os.path.abspath(__file__))
 SHEET = os.path.join(VOCAB_DIR, "my-vocab-sheet.xlsx")
 QUEUE = os.path.join(VOCAB_DIR, "queue.jsonl")
 HISTORY = os.path.join(VOCAB_DIR, "history.jsonl")    # append-only, the real record
+ILLUSTRATIONS = os.path.join(VOCAB_DIR, "illustrations")  # <id>.svg, drawn by draw_illustrations.py
+LOCK = os.path.join(VOCAB_DIR, ".flush.lock")
 
 # The short part-of-speech the answer uses -> the word the ID and TAGS spell out.
 POS_LONG = {
@@ -77,18 +80,33 @@ def deep_dive(item):
     return html(strip_md(value))
 
 
+def illustration(word_id):
+    """The Illustration cell: the word's SVG on one line, or empty when none is drawn yet.
+
+    The picture lives in its own file rather than in history, so redrawing one is
+    deleting a file, and a word met again keeps its picture — the ID does not change.
+    """
+    try:
+        with open(os.path.join(ILLUSTRATIONS, f"{word_id}.svg"), encoding="utf-8") as fh:
+            return clean(fh.read())
+    except OSError:
+        return ""
+
+
 def vocab_row(item):
     # One row per word, forever: meeting the word again refreshes the card he already
     # has rather than opening a second one.
     pos = POS_LONG.get(item.get("pos", "").lower(), item.get("pos", "")).strip()
+    word_id = f"{slug(item['word'])}-{slug(pos)}"
     return {
-        "ID": f"{slug(item['word'])}-{slug(pos)}",
+        "ID": word_id,
         "SYNC": "TRUE",
         "SUBDECK 1": item["date"],
         "Word": clean(item["word"]),
         "IPA": clean(item.get("ipa", "")),
         "POS": pos,
         "Meaning": clean(item.get("meaning", "")),
+        "Illustration": illustration(word_id),
         "Collocation": clean(item.get("collocation", "")),
         "Example": html(item.get("example", "")),
         # Free prose, captured verbatim: nothing to normalise, only tabs to strip.
@@ -170,6 +188,12 @@ def main():
     ap.add_argument("--sheet", default=SHEET)
     ap.add_argument("--queue", default=QUEUE)
     args = ap.parse_args()
+
+    # The Stop hook and draw_illustrations.py both flush, and can do so at the same
+    # moment. Both rewrite history.jsonl in full, so the second one waits its turn
+    # rather than writing over the first with a copy read before it finished.
+    lock = open(LOCK, "w")
+    fcntl.flock(lock, fcntl.LOCK_EX)
 
     items = read_items(HISTORY)
     pending = [] if args.rebuild else read_items(args.queue)

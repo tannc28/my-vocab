@@ -1,0 +1,10 @@
+{"id": "back-out-phrasal-verb", "pic": "contrast | revert · roll back · back out | one commit line A–B–C, only the action on C changes"}
+{"id": "convoluted-adjective", "pic": "contrast | complex · convoluted | left: many parts, all needed, orderly · right: one simple job taking a winding road"}
+{"id": "bottleneck-noun", "pic": "metaphor | bottleneck | wide pipe, one narrow neck, many dots waiting, few done"}
+{"id": "stop-gap-noun", "pic": "metaphor | stop-gap · workaround · hotfix | a hole in a pipe plugged with a temporary patch, the proper part still on its way"}
+{"id": "trickle-in-phrasal-verb", "pic": "literal | trickle in · pour in | left: tap dripping one drop at a time · right: requests arriving seconds apart"}
+{"id": "leak-into-phrasal-verb", "pic": "literal | leak into | left: water seeping through a wall crack into the next room · right: one doc's details seeping into a shared kit box"}
+{"id": "chain-of-trust-noun", "pic": "structure | chain of trust | root key → doc.js → component → file, each checks the next; second row broken at one link"}
+{"id": "fixpoint-noun", "pic": "structure | fixpoint · converge · terminate | a set grows round after round (3, 5, 6, 6) until one more round adds nothing"}
+{"id": "overkill-noun", "pic": "idiom | overkill | a sledgehammer over a tiny nut"}
+{"id": "a-moving-target-idiom", "pic": "idiom | a moving target | an archer aiming while the target keeps sliding away; a doc pinned to a fixed version stays still"}

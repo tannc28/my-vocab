@@ -39,9 +39,10 @@ but **must not contain a tab**.
 | E | `IPA` | front |
 | F | `POS` | front |
 | G | `Meaning` | back — English-to-English |
-| H | `Collocation` | back |
-| I | `Example` | back |
-| J | `Deep dive` | back, last — free prose, the only bilingual column |
+| H | `Illustration` | back — one-line SVG, drawn from the answer's `pic:` line; empty until drawn |
+| I | `Collocation` | back |
+| J | `Example` | back |
+| K | `Deep dive` | back, last — free prose, the only bilingual column |
 
 Config row (row 2) — do not rewrite it when adding words:
 
@@ -51,6 +52,7 @@ Word         side=front; size=40; bold; tts=en_US
 IPA          side=front; size=18; color=muted
 POS          side=front; size=14; color=accent; italic
 Meaning      size=22
+Illustration (empty — a plain column, so the SVG renders as HTML)
 Collocation  label=Collocations; size=17; color=accent
 Example      label=Examples; size=17; italic; tts=en_US
 Deep dive    label=Deep dive; size=16; color=muted
@@ -125,6 +127,29 @@ as HTML and a bare newline would collapse to a space.
   anchors the word to a real memory, so it outranks anything the dictionary offers. Then the
   dictionary's own example when the chosen sense has one, then one more showing a different
   collocation or grammatical pattern. Vary the structure across them.
+
+### The `Illustration` column
+
+The cell holds one line of SVG markup, and the column has **no** directive on purpose. A
+plain column is rendered through `{{Illustration}}`, which Anki fills with the field's HTML
+as-is, so the markup draws as a picture; `image` would instead wrap it in `<img src="…">` and
+expect a URL. `{{#Illustration}}` around it means a row with no picture leaves no gap.
+
+Nobody writes this cell by hand. The pipeline:
+
+1. The answer's word list carries a `pic: <type> | <subjects> | <scene>` line per word —
+   a brief, not a picture (the rule lives in `~/.claude/CLAUDE.md`).
+2. `vocab-capture.py` stores it as `pic` on the history item, flushes as usual, then starts
+   `draw_illustrations.py` in the background.
+3. The drawer calls an isolated `claude -p` per word, checks the SVG (`validate()`: shapes and
+   text only, no `<style>`/`id`/`class`/links, colours from a fixed palette, ≤ 6 KB), writes
+   `illustrations/<id>.svg`, logs the cost to `illustrations/draw-log.jsonl`, and flushes again.
+4. `flush_queue.py` reads `illustrations/<id>.svg` into the cell.
+
+`pics.jsonl` (`{"id": …, "pic": …}` per line) gives a word a brief without touching history —
+how an old word gets a picture, or a bad brief gets replaced. Redraw one picture:
+`./draw_illustrations.py --redo --ids <id>`. A file whose `<svg>` carries `data-hand` was drawn
+by hand and is never redrawn.
 
 ## 4. The `grammar` tab
 

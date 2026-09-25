@@ -85,7 +85,7 @@ select.chip{padding:4px 8px}
 .ex{border-left:2px solid var(--line);padding:1px 0 1px 12px;margin:0 0 6px;font-style:italic;font-family:var(--serif);font-size:15.5px}
 .pic{margin:10px 0 4px;color:var(--ink)}
 .pic svg{display:block;margin:0 auto}
-.deep{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--ink2);font-size:13.5px}
+.deep{white-space:pre-line;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--ink2);font-size:13.5px}
 .links{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .links a{border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:12.5px;text-decoration:none;color:var(--ink2)}
 .links a:hover{border-color:var(--accent);color:var(--accent)}
@@ -194,18 +194,37 @@ function bucket(pos){
   for(var i = 0; i < BUCKETS.length; i++){ if(p.indexOf(BUCKETS[i][0]) === 0) return BUCKETS[i][0]; }
   return "other";
 }
-function deepOf(it){ var d = it.deep || it.hint || ""; return Array.isArray(d) ? d.join(" ") : d; }
+/* Deep dive = prose, then one comparison line each, as in the chat. Older captures have
+   the comparisons folded in as "… So sánh: a — "…" (…) · b — …"; split the same way
+   flush_queue.deep_parts() does. */
+var LEGACY_SPLIT = /(?<=\))\s·\s(?=(?:[^"·]{1,60}?\s—\s)?")/;
+function deepParts(it){
+  var d = it.deep || it.hint || "";
+  if(Array.isArray(d)) d = d.join(" ");
+  var c = (it.contrasts || []).slice();
+  var i = d.indexOf(" So sánh: ");
+  if(!c.length && i >= 0){
+    c = d.slice(i + 10).split(LEGACY_SPLIT).map(function(s){ return s.trim(); }).filter(Boolean);
+    d = d.slice(0, i);
+  }
+  return {prose: d.trim(), contrasts: c};
+}
+function deepOf(it){
+  var p = deepParts(it);
+  return [p.prose].concat(p.contrasts.map(function(c){ return "· " + c; })).join("\n");
+}
 
 /* ------------------------------------------------------------------- build
-   Cùng luật dedupe với flush_queue.py: khoá là <word>-<pos dạng dài>, lần gặp
-   sau thay hẳn lần trước và dời lên ngày mới nhất. Trang này chỉ là một cách
+   Cùng luật dedupe với flush_queue.py: chỉ lấy lần gặp có Deep dive, khoá là
+   <word>-<pos dạng dài>, lần gặp sau thay hẳn lần trước và dời lên ngày mới nhất. Trang này chỉ là một cách
    render history.jsonl — đúng file mà sheet .xlsx cũng được dựng ra từ đó. */
 function build(items){
   var index = new Map(), times = new Map(), g = [], seen = new Set();
   items.forEach(function(it){
     var kind = it.kind || "vocab";
     if(kind === "vocab"){
-      if(!it.word) return;
+      // Same as the sheet: a capture with no Deep dive never becomes a card.
+      if(!it.word || !deepParts(it).prose) return;
       var rawPos = String(it.pos || "").trim();
       var id = slug(it.word) + "-" + slug(POS_LONG[rawPos.toLowerCase()] || rawPos);
       times.set(id, (times.get(id) || 0) + 1);

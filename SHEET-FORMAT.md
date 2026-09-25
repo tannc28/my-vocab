@@ -39,10 +39,10 @@ but **must not contain a tab**.
 | E | `IPA` | front |
 | F | `POS` | front |
 | G | `Meaning` | back — English-to-English |
-| H | `Illustration` | back — one-line SVG, drawn from the answer's `pic:` line; empty until drawn |
+| H | `Illustration` | back — one-line SVG, up to three labelled panels; empty until drawn |
 | I | `Collocation` | back |
 | J | `Example` | back |
-| K | `Deep dive` | back, last — free prose, the only bilingual column |
+| K | `Deep dive` | back, last — prose, then one comparison per line; the only bilingual column |
 
 Config row (row 2) — do not rewrite it when adding words:
 
@@ -61,9 +61,9 @@ Deep dive    label=Deep dive; size=16; color=muted
 Which produces one card:
 
 - **Front** — the word at 40 px, read aloud by the system voice, then IPA and part of speech.
-- **Back** — meaning, collocations, then all examples, also read aloud, and last the
-  Deep dive: one line of free prose, in Vietnamese, opening with the word itself and going
-  on to the near-synonyms and how their use differs. It is last and visually quiet on
+- **Back** — meaning, the illustration, collocations, then all examples, also read aloud,
+  and last the Deep dive: free prose in Vietnamese, opening with the word itself and going
+  on to the near-synonyms and how their use differs, then one comparison sentence per line. It is last and visually quiet on
   purpose — it is read after the English has already done its work, so it deepens the card
   instead of short-circuiting it. The grammar tab has the same column, holding why the
   mistake happened rather than what was changed.
@@ -73,6 +73,16 @@ Which produces one card:
 **`ID` — `<word>-<pos>`, lower-case, non-word characters replaced by `-`.**
 Example: `work-out-phrasal-verb`. Uniqueness is *(word, pos)* and nothing else: one row per
 word, for good.
+
+**Only a word that was taught becomes a row: its capture must carry a Deep dive.** A
+capture without one stays in `history.jsonl` but never reaches the sheet, and it cannot
+replace an earlier capture of the same word that did carry one. That makes the deck the
+words that came with an explanation, not every word that was merely named.
+
+**The Deep dive cell is the prose, then one comparison per line**, joined by `<br>` and
+each line starting with `· `, exactly as the chat shows them. Older captures stored the
+comparisons folded into the prose after ` So sánh: `; `flush_queue.deep_parts()` splits
+those back into lines, so history is never rewritten.
 
 **A word met again does not make a second row — it moves to the day it was met again.**
 The later capture replaces the row wholesale, `Example` included, and the row leaves its
@@ -135,21 +145,27 @@ plain column is rendered through `{{Illustration}}`, which Anki fills with the f
 as-is, so the markup draws as a picture; `image` would instead wrap it in `<img src="…">` and
 expect a URL. `{{#Illustration}}` around it means a row with no picture leaves no gap.
 
+The picture has up to three panels, stacked in card order, each labelled with the field it
+illustrates: `MEANING` (the word's core image), `EXAMPLE` (the situation of the sentence it
+was met in), `DEEP DIVE` (the comparison lines as a minimal pair). The model draws the fewest
+that carry the word; the log records which it chose.
+
 Nobody writes this cell by hand. The pipeline:
 
-1. The answer's word list carries a `pic: <type> | <subjects> | <scene>` line per word —
-   a brief, not a picture (the rule lives in `~/.claude/CLAUDE.md`).
+1. The answer's word list carries a `pic: <panels> | <notes>` brief per word (the rule lives
+   in `~/.claude/CLAUDE.md`). It is a hint: a word without one still gets a picture.
 2. `vocab-capture.py` stores it as `pic` on the history item, flushes as usual, then starts
-   `draw_illustrations.py` in the background.
+   `draw_illustrations.py --new` in the background, which draws only words this hook
+   captured.
 3. The drawer calls an isolated `claude -p` per word, checks the SVG (`validate()`: shapes and
-   text only, no `<style>`/`id`/`class`/links, colours from a fixed palette, ≤ 6 KB), writes
+   text only, no `<style>`/`id`/`class`/links, colours from a fixed palette, ≤ 10 KB), writes
    `illustrations/<id>.svg`, logs the cost to `illustrations/draw-log.jsonl`, and flushes again.
 4. `flush_queue.py` reads `illustrations/<id>.svg` into the cell.
 
-`pics.jsonl` (`{"id": …, "pic": …}` per line) gives a word a brief without touching history —
-how an old word gets a picture, or a bad brief gets replaced. Redraw one picture:
-`./draw_illustrations.py --redo --ids <id>`. A file whose `<svg>` carries `data-hand` was drawn
-by hand and is never redrawn.
+`./draw_illustrations.py` with no flags draws every sheet word still missing a picture (a
+backfill, so it runs only by hand). Redraw one: `--redo --ids <id>`. A `pics.jsonl` line
+(`{"id": …, "pic": …}`) overrides a word's brief, and `pic: none` there means no picture. A
+file whose `<svg>` carries `data-hand` was drawn by hand and is never redrawn.
 
 ## 4. The `grammar` tab
 
